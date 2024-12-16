@@ -11,6 +11,8 @@ variable "lambda_info" {
     lambda_function_timeout             = string
     lambda_function_tags                = map(string)
     lambda_function_env_var             = map(string)
+    lambda_function_log_format          = string
+    lambda_function_log_group           = string
     lambda_payload_file_dir             = string
     lambda_function_trigger_type        = string
     lambda_function_trigger_id          = string

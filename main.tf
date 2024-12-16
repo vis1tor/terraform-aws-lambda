@@ -14,7 +14,12 @@ resource "aws_lambda_function" "this" {
     variables = each.value.lambda_function_env_var
   }
 
-  layers = [aws_lambda_layer_version.this[each.key].arn]
+  logging_config {
+    log_format = each.value.lambda_function_log_format
+    log_group  = each.value.lambda_function_log_group
+  }
+
+  layers = try([aws_lambda_layer_version.this[each.key].arn], [])
   tags   = each.value.lambda_function_tags
 }
 
@@ -27,7 +32,7 @@ data "archive_file" "this" {
 
 # Lambda 함수를 호출하는 데 필요한 권한을 추가
 resource "aws_lambda_permission" "this" {
-  for_each      = { for k, v in var.lambda_info : k => v }
+  for_each      = { for k, v in var.lambda_info : k => v if v.lambda_function_trigger_type != "" }
   statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.this[each.key].function_name
@@ -54,5 +59,4 @@ resource "aws_lambda_layer_version" "this" {
   layer_name               = each.value.lambda_function_layer_name
   compatible_runtimes      = [each.value.lambda_function_layer_runtime]
   compatible_architectures = [each.value.lambda_function_layer_architectures]
-
 }
